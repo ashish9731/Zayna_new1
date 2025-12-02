@@ -114,7 +114,7 @@ export const generateMeetingMinutes = async (transcript: string, metadata: Meeti
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   const prompt = `
-    You are Zayna, an expert executive assistant. Create a professional and actionable Meeting Minutes (MoM) document based on the provided transcript and meeting details.
+    You are Zayna, an expert executive assistant. Create a comprehensive, professional, and actionable Meeting Minutes (MoM) document based on the provided transcript and meeting details.
     
     *** MEETING DETAILS ***
     Title: ${metadata.title}
@@ -133,7 +133,7 @@ export const generateMeetingMinutes = async (transcript: string, metadata: Meeti
     1. **NO HALLUCINATIONS**: Only include information explicitly found in the transcript.
     2. **NO FAKE TASKS**: Action Items must be real tasks mentioned by speakers. If a task has no clear owner, mark it as "Unassigned".
     3. **TITLE HANDLING**: If the provided Title looks like a filename (e.g., "recovered_recording", "audio_123"), IGNORE it and title the document based on the actual topic discussed.
-    4. **SIMPLE STRUCTURE**: Use a clean, professional structure without sales or coaching elements.
+    4. **COMPREHENSIVE STRUCTURE**: Use a detailed professional structure with all requested sections.
 
     Use the following structure:
 
@@ -143,16 +143,22 @@ export const generateMeetingMinutes = async (transcript: string, metadata: Meeti
     (A concise paragraph summarizing the main purpose and outcome of the meeting).
 
     ## 2. Key Discussion Points
-    (Detailed bullet points of what was discussed, organized by topic).
+    (Detailed bullet points of what was discussed, organized by topic with sub-bullets where appropriate).
 
     ## 3. Action Items
-    (MUST be a Markdown Table with columns: **Task Description** | **Owner** | **Due Date**).
+    (MUST be a Markdown Table with columns: **Task Description** | **Owner** | **Due Date** | **Priority**).
 
-    ## 4. Decisions Made
-    (List of agreements or final decisions).
+    ## 4. Key Decisions Made
+    (List of agreements or final decisions with brief context).
 
-    ## 5. Next Steps
-    (What happens next and when).
+    ## 5. Recommendations
+    (Strategic recommendations based on the discussion, numbered list format).
+
+    ## 6. Next Steps
+    (What happens next, who is responsible, and when).
+
+    ## 7. Next Meeting Scheduled
+    (If discussed, include date, time, and agenda items for the next meeting. If not discussed, state "Not scheduled").
 
     Tone: Professional, Clear, Concise, and Action-Oriented.
   `;

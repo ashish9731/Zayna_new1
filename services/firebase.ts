@@ -1,16 +1,17 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, User } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
+import { updateProfile } from "firebase/auth";
 
-// Your web app's Firebase configuration
+// Your web app's Firebase configuration - using environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyBPZRXGn7rSXKPth1W8J2KJUKZj9fgVp-c",
-  authDomain: "zayna-5912a.firebaseapp.com",
-  projectId: "zayna-5912a",
-  storageBucket: "zayna-5912a.firebasestorage.app",
-  messagingSenderId: "290479379887",
-  appId: "1:290479379887:web:6f4287a60b326532854b5a",
-  measurementId: "G-RBCLGYMPHX"
+  apiKey: process.env.VITE_FIREBASE_API_KEY,
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.VITE_FIREBASE_APP_ID,
+  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
