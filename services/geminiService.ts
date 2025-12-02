@@ -114,7 +114,7 @@ export const generateMeetingMinutes = async (transcript: string, metadata: Meeti
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   const prompt = `
-    You are Zayna, an expert executive assistant. Create a highly detailed, professional, and actionable Meeting Minutes (MoM) document based on the provided transcript and meeting details.
+    You are Zayna, an expert executive assistant. Create a professional and actionable Meeting Minutes (MoM) document based on the provided transcript and meeting details.
     
     *** MEETING DETAILS ***
     Title: ${metadata.title}
@@ -131,28 +131,28 @@ export const generateMeetingMinutes = async (transcript: string, metadata: Meeti
     
     STRICT RULES:
     1. **NO HALLUCINATIONS**: Only include information explicitly found in the transcript.
-    2. **NO FAKE TASKS**: Action Items must be real tasks mentioned by speakers. DO NOT assign tasks to "Zayna" or "AI". If a task has no clear owner, mark it as "Unassigned".
-    3. **TITLE HANDLING**: If the provided Title looks like a filename (e.g., "recovered_recording", "audio_123"), IGNORE it and title the document based on the actual topic discussed (e.g., "Project Sync" or "Client Meeting").
-    4. **COLORFUL HEADERS**: Use Emojis in section headers to make the document visually engaging.
+    2. **NO FAKE TASKS**: Action Items must be real tasks mentioned by speakers. If a task has no clear owner, mark it as "Unassigned".
+    3. **TITLE HANDLING**: If the provided Title looks like a filename (e.g., "recovered_recording", "audio_123"), IGNORE it and title the document based on the actual topic discussed.
+    4. **SIMPLE STRUCTURE**: Use a clean, professional structure without sales or coaching elements.
 
     Use the following structure:
 
     # (Insert Topic-Based Title Here)
     
-    ## 🎯 1. Executive Summary
-    (A concise paragraph summarizing the main purpose, tone, and outcome of the meeting. Do not mention "files" or "recordings", focus on the content).
+    ## 1. Meeting Overview
+    (A concise paragraph summarizing the main purpose and outcome of the meeting).
 
-    ## 🗣️ 2. Key Discussion Points
-    (Detailed bullet points of what was discussed. Group related topics together).
+    ## 2. Key Discussion Points
+    (Detailed bullet points of what was discussed, organized by topic).
 
-    ## 🚀 3. Action Items
-    (MUST be a Markdown Table with columns: **Task Description** | **Owner** | **Priority** | **Deadline**).
-    
-    ## 🧠 4. Key Decisions Made
+    ## 3. Action Items
+    (MUST be a Markdown Table with columns: **Task Description** | **Owner** | **Due Date**).
+
+    ## 4. Decisions Made
     (List of agreements or final decisions).
 
-    ## 📅 5. Next Steps & Follow-up
-    (What happens next? When is the next meeting?).
+    ## 5. Next Steps
+    (What happens next and when).
 
     Tone: Professional, Clear, Concise, and Action-Oriented.
   `;
@@ -318,7 +318,12 @@ export const askZaynaAgent = async (query: string, context: { transcript: string
 
     // Prepare context (limit length to avoid token limits)
     const notesContext = context.notes.map(n => `[Note: ${n.title}] ${n.content}`).join('\n').substring(0, 3000);
-    const meetingContext = `TRANSCRIPT START:\n${context.transcript.substring(0, 5000)}\nTRANSCRIPT END\n\nMINUTES:\n${context.mom}`;
+    const meetingContext = `TRANSCRIPT START:
+${context.transcript.substring(0, 5000)}
+TRANSCRIPT END
+
+MINUTES:
+${context.mom}`;
 
     const prompt = `
         You are Zayna, a private, intelligent executive assistant. 

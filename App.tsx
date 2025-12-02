@@ -3,9 +3,8 @@ import Hero from './components/Hero';
 import Recorder from './components/Recorder';
 import Login from './components/Login';
 import NotesView from './components/NotesView';
-import AnalyticsDashboard from './components/AnalyticsDashboard';
 import AskZayna from './components/AskZayna';
-import { transcribeAudio, generateMeetingMinutes, generateEmailDraft, generateSentimentAnalysis } from './services/geminiService';
+import { transcribeAudio, generateMeetingMinutes, generateEmailDraft } from './services/geminiService';
 import { AppStatus, MeetingMetadata, MeetingResult, RecordingSource } from './types';
 import { Settings, MapPin, Loader2, Download, Mail, Home as HomeIcon, Edit3, Check, ArrowRight, AlertTriangle, PlusCircle, Users, Bell, Link as LinkIcon, Lock, StickyNote, Moon, Sun, Monitor, ChevronDown, LogOut } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -69,7 +68,6 @@ const App: React.FC = () => {
     transcript: '',
     mom: '',
     emailDraft: '',
-    sentiment: null,
     audioBlob: null
   });
   
@@ -241,9 +239,8 @@ const App: React.FC = () => {
     try {
       const mom = await generateMeetingMinutes(result.transcript, metadata);
       const emailDraft = await generateEmailDraft(mom, metadata);
-      const sentiment = await generateSentimentAnalysis(result.transcript); // NEW: Generate Sentiment
       
-      setResult(prev => ({ ...prev, mom, emailDraft, sentiment }));
+      setResult(prev => ({ ...prev, mom, emailDraft }));
       setStatus(AppStatus.COMPLETED);
     } catch (e: any) {
       setError(e.message);
@@ -254,7 +251,7 @@ const App: React.FC = () => {
   const handleHome = () => {
     setStatus(AppStatus.HOME);
     setActiveTab('HOME');
-    setResult({ transcript: '', mom: '', emailDraft: '', sentiment: null, audioBlob: null });
+    setResult({ transcript: '', mom: '', emailDraft: '', audioBlob: null });
     setError(null);
     scrollToTop();
   };
@@ -266,20 +263,6 @@ const App: React.FC = () => {
     zip.file("meeting_minutes.md", result.mom);
     zip.file("email_draft.txt", result.emailDraft);
     
-    // Add screenshot of analytics dashboard
-    const dashboardElement = document.getElementById('analytics-dashboard');
-    if (dashboardElement) {
-        try {
-            const canvas = await html2canvas(dashboardElement);
-            const imgData = canvas.toDataURL('image/png');
-            // Remove data:image/png;base64, header
-            const base64Data = imgData.replace(/^data:image\/(png|jpg);base64,/, "");
-            zip.file("analytics_dashboard.png", base64Data, {base64: true});
-        } catch (err) {
-            console.error("Failed to capture dashboard screenshot", err);
-        }
-    }
-
     const ext = result.audioBlob.type.includes('wav') ? 'wav' : 'webm';
     zip.file(`meeting_audio.${ext}`, result.audioBlob);
     const content = await zip.generateAsync({ type: "blob" });
@@ -609,13 +592,6 @@ const App: React.FC = () => {
                  </button>
                </div>
             </div>
-
-            {/* NEW: Analytics Dashboard */}
-            {result.sentiment && (
-                <div id="analytics-dashboard">
-                    <AnalyticsDashboard data={result.sentiment} />
-                </div>
-            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 glass-panel p-8 md:p-12 rounded-2xl border border-slate-200 dark:border-slate-700 min-h-[60vh] bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xl">

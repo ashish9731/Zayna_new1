@@ -49,7 +49,6 @@ export interface MeetingResult {
   transcript: string;
   mom: string; 
   emailDraft: string; 
-  sentiment?: SentimentData | null;
   audioBlob: Blob | null;
 }
 
