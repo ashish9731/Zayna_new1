@@ -1,0 +1,9 @@
+{
+  "name": "Zayna - Privacy-First Meeting Intelligence",
+  "description": "The intelligent meeting assistant that prioritizes your privacy. Built with a Zero-Retention Architecture, your transcripts and audio are processed ephemerally and stored locally on your device.",
+  "requestFramePermissions": [
+    "microphone",
+    "display-capture",
+    "camera"
+  ]
+}
