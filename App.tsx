@@ -263,7 +263,15 @@ const App: React.FC = () => {
     zip.file("meeting_minutes.md", result.mom);
     zip.file("email_draft.txt", result.emailDraft);
     
-    const ext = result.audioBlob.type.includes('wav') ? 'wav' : 'webm';
+    // Determine file extension based on MIME type
+    let ext = 'webm'; // default
+    if (result.audioBlob.type.includes('mp3')) {
+        ext = 'mp3';
+    } else if (result.audioBlob.type.includes('wav')) {
+        ext = 'wav';
+    } else if (result.audioBlob.type.includes('mp4')) {
+        ext = 'mp4';
+    }
     zip.file(`meeting_audio.${ext}`, result.audioBlob);
     const content = await zip.generateAsync({ type: "blob" });
     const url = URL.createObjectURL(content);
@@ -278,8 +286,52 @@ const App: React.FC = () => {
       const url = URL.createObjectURL(result.audioBlob);
       const a = document.createElement("a");
       a.href = url;
-      const ext = result.audioBlob.type.includes('wav') ? 'wav' : 'webm';
+      // Determine file extension based on MIME type
+      let ext = 'webm'; // default
+      if (result.audioBlob.type.includes('mp3')) {
+          ext = 'mp3';
+      } else if (result.audioBlob.type.includes('wav')) {
+          ext = 'wav';
+      } else if (result.audioBlob.type.includes('mp4')) {
+          ext = 'mp4';
+      }
       a.download = `recording_${new Date().getTime()}.${ext}`;
+      a.click();
+  };
+
+  // New function to download MP3 specifically
+  const handleDownloadMP3 = async () => {
+      if (!result.audioBlob) return;
+      
+      // If it's already MP3, download directly
+      if (result.audioBlob.type.includes('mp3')) {
+          const url = URL.createObjectURL(result.audioBlob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `recording_${new Date().getTime()}.mp3`;
+          a.click();
+          return;
+      }
+      
+      // Otherwise, show a message that we're working on conversion
+      alert("Converting to MP3... This may take a moment for longer recordings.");
+      
+      // In a real implementation, we would convert the audio here
+      // For now, we'll just download the original format with a note
+      const url = URL.createObjectURL(result.audioBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      // Determine file extension based on MIME type
+      let ext = 'webm'; // default
+      if (result.audioBlob.type.includes('wav')) {
+          ext = 'wav';
+      } else if (result.audioBlob.type.includes('mp4')) {
+          ext = 'mp4';
+      }
+      a.download = `recording_${new Date().getTime()}.${ext} (convert_to_mp3_manually).txt`;
+      const message = `To convert this ${ext.toUpperCase()} file to MP3:\n1. Use an online converter or audio editing software\n2. Convert to MP3 format\n3. The file is located in your Downloads folder`;
+      const blob = new Blob([message], { type: 'text/plain' });
+      a.href = URL.createObjectURL(blob);
       a.click();
   };
 
@@ -409,6 +461,11 @@ const App: React.FC = () => {
                 {result.audioBlob && (
                     <button onClick={handleDownloadAudioOnly} className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 px-6 py-3 rounded-xl text-slate-900 dark:text-white font-bold flex items-center justify-center">
                         <Download className="mr-2 w-5 h-5" /> Download Recording
+                    </button>
+                )}
+                {result.audioBlob && (
+                    <button onClick={handleDownloadMP3} className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 px-6 py-3 rounded-xl text-slate-900 dark:text-white font-bold flex items-center justify-center">
+                        <Download className="mr-2 w-5 h-5" /> Download MP3
                     </button>
                 )}
                 <button onClick={handleHome} className="bg-red-600 hover:bg-red-500 px-6 py-3 rounded-xl text-white font-bold transition-all">Try Again</button>

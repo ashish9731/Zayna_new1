@@ -27,6 +27,8 @@ const normalizeMimeType = (blobType: string): string => {
         'audio/vnd.wave': 'audio/wav',
         'audio/wave': 'audio/wav',
         'audio/mp3': 'audio/mpeg',
+        'audio/mpeg': 'audio/mpeg',
+        'audio/x-mp3': 'audio/mpeg',
         'audio/x-m4a': 'audio/mp4',
         'audio/m4a': 'audio/mp4',
         'audio/x-mp4': 'audio/mp4',

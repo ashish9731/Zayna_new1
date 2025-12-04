@@ -139,42 +139,44 @@ const Recorder: React.FC<RecorderProps> = ({ onStop, source: recordingSource }) 
   };
 
   const startMediaRecorder = (stream: MediaStream, audioCtx: AudioContext) => {
-      if (!analyserRef.current) {
-         setupVisualizer(audioCtx, stream);
+    if (!analyserRef.current) {
+       setupVisualizer(audioCtx, stream);
+    }
+
+    // Prioritize MP3 for best compatibility and smaller file size
+    let mimeType = '';
+    if (MediaRecorder.isTypeSupported('audio/mp3')) {
+        mimeType = 'audio/mp3';
+    } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        mimeType = 'audio/webm';
+    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+    } else {
+        console.warn("No specific mime type supported, using default");
+    }
+
+    const options = mimeType ? { mimeType } : undefined;
+    const mediaRecorder = new MediaRecorder(stream, options);
+    mediaRecorderRef.current = mediaRecorder;
+    chunksRef.current = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) {
+        chunksRef.current.push(e.data);
       }
+    };
 
-      // Prioritize WebM for best compatibility with Gemini
-      let mimeType = '';
-      if (MediaRecorder.isTypeSupported('audio/webm')) {
-          mimeType = 'audio/webm';
-      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-          mimeType = 'audio/mp4';
-      } else {
-          console.warn("No specific mime type supported, using default");
+    mediaRecorder.onstop = () => {
+      const type = mimeType || chunksRef.current[0]?.type || 'audio/webm';
+      const blob = new Blob(chunksRef.current, { type });
+      if (blob.size === 0) {
+          console.error("Recording produced 0 bytes.");
       }
+      onStop(blob);
+    };
 
-      const options = mimeType ? { mimeType } : undefined;
-      const mediaRecorder = new MediaRecorder(stream, options);
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        const type = mimeType || chunksRef.current[0]?.type || 'audio/webm';
-        const blob = new Blob(chunksRef.current, { type });
-        if (blob.size === 0) {
-            console.error("Recording produced 0 bytes.");
-        }
-        onStop(blob);
-      };
-
-      mediaRecorder.start(1000); 
-      startTimer();
+    mediaRecorder.start(1000); 
+    startTimer();
   };
 
   const setupVisualizer = (audioCtx: AudioContext, stream: MediaStream) => {
